@@ -1,0 +1,37 @@
+name: Publish Node.js Package
+
+on:
+  workflow_dispatch:
+    inputs:
+      release-version:
+        description: 'Release Version'
+        required: true
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Set Node.js version
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        registry-url: 'https://npm.pkg.github.com/'
+    
+    - name: install dependencies
+      run: npm ci
+
+    - name: Publish to GitHub Packages
+      run: npm publish
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
+    # タグ付け
+    - name: Create tag
+      run: |
+        git tag Release/${{ inputs.release-version }}
+        git push origin Release/${{ inputs.release-version }}
+        

@@ -1,5 +1,5 @@
 {
-    "name": "node-red-iotedge",
+    "name": "@project-gaudi/node-red-iotedge",
     "version": "1.2.0",
     "description": "",
     "author": "",
