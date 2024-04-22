@@ -1,9 +1,12 @@
 {
     "name": "@project-gaudi/node-red-iotedge",
     "version": "1.2.0",
-    "description": "",
-    "author": "",
-    "license": "ISC",
+    "description": "Based on node-red-contrib-azure-iot-edge-module v1.0.4",
+    "author": "Toyota Industries Corporation",
+    "publishConfig": {
+        "registry": "https://npm.pkg.github.com/Project-GAUDI/"
+    },
+    "license": "MIT",
     "keywords": [
         "node-red"
     ],
@@ -13,8 +16,12 @@
         }
     },
     "dependencies": {
-      "gaudi-iot-device": "file:/usr/src/node-red/node_modules/gaudi-iot-device",
+      "@project-gaudi/gaudi-iot-device": "^1.0.0",
       "azure-iot-device-mqtt": "^1.15.1",
       "azure-iot-device-amqp": "^1.13.1"
+    },
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/Project-GAUDI/node-red-iotedge.git"
     }
 }
