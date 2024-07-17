@@ -1,11 +1,8 @@
 name: Publish Node.js Package
 
 on:
-  workflow_dispatch:
-    inputs:
-      release-version:
-        description: 'Release Version'
-        required: true
+  release:
+    types: [published]
 
 jobs:
   build-and-publish:
@@ -30,10 +27,4 @@ jobs:
       run: npm publish
       env:
         NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        
-    # タグ付け
-    - name: Create tag
-      run: |
-        git tag Release/${{ inputs.release-version }}
-        git push origin Release/${{ inputs.release-version }}
         
