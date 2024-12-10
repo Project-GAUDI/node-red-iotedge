@@ -5,8 +5,8 @@ description="Based on node-red-contrib-azure-iot-edge-module v1.0.4"
 target="package.json"
 author="Toyota Industries Corporation"
 lisence="MIT"
-version='${VERSION}'
-sdkVersion='${SDK_VERSION}'
+version=${VERSION}
+sdkVersion=${SDK_VERSION}
 
 sed -i 's/\"name\": \".*\",/\"name\": \"'"${name}"'\",/g' "${target}"
 sed -i 's/\"version\": \".*\",/\"version\": \"'"${version}"'\",/g' "${target}"
