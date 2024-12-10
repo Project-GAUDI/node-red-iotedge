@@ -13,7 +13,7 @@ class myErrorFilter {
         this.NotImplementedError = true;
         this.NotConnectedError = true;
         this.IotHubQuotaExceededError = true;
-        this.MessageTooLargeError = true;
+        this.MessageTooLargeError = false;
         this.InternalServerError = true;
         this.ServiceUnavailableError = true;
         this.IotHubNotFoundError = true;
@@ -22,7 +22,7 @@ class myErrorFilter {
         this.TooManyDevicesError = true;
         this.ThrottlingError = true;
         this.DeviceAlreadyExistsError = true;
-        this.DeviceMessageLockLostError = true;
+        this.DeviceMessageLockLostError = false;
         this.InvalidEtagError = true;
         this.InvalidOperationError = true;
         this.PreconditionFailedError = true;
