@@ -13,10 +13,10 @@ jobs:
         fetch-depth: 0
        
     - name: Grant execute permission to edit_packageJSON.sh
-      run: chmod +x ./scripts/edit_packageJSON.sh
+      run: chmod +x ./tools/edit_packageJSON.sh
   
     - name: Edit package.json for gaudi-iot-device
-      run: ./scripts/edit_packageJSON.sh
+      run: ./tools/edit_packageJSON.sh
       env: 
         VERSION: ${{ github.event.release.tag_name }}
         SDK_VERSION: '6.0.0'
