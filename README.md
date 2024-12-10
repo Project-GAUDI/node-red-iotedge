@@ -18,8 +18,8 @@
   * [Module Output](#Node-Specification-module-output)
   * [Module Twin](#Node-Specification-module-twin)
   * [Module Method](#Node-Specification-module-method)
-  * [Feedback](#feedback)
-  * [LICENSE](#license)
+* [Feedback](#feedback)
+* [LICENSE](#license)
   
 ## 概要
 Azure IoT Edge Node-RED Moduleをベースに一部カスタムを行ったNodeRedのカスタムノードです。
