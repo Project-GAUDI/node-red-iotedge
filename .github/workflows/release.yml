@@ -29,7 +29,12 @@ jobs:
         scope: '@project-gaudi'
 
     - name: install dependencies
-      run: npm ci
+      run: npm install
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: build
+      run: npm run build
       env:
         NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

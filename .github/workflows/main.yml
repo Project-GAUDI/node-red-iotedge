@@ -7,12 +7,13 @@ on:
       - develop
 
 jobs:
-  build-and-publish:
+  build:
     runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v4
       with:
         fetch-depth: 0
+
     - name: Grant execute permission to edit_packageJSON.sh
       run: chmod +x ./tools/edit_packageJSON.sh
     
@@ -29,6 +30,11 @@ jobs:
         registry-url: 'https://npm.pkg.github.com/'
     
     - name: install dependencies
-      run: npm ci
+      run: npm install
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: build
+      run: npm run build
       env:
         NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
