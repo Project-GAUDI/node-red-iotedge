@@ -400,4 +400,4 @@ Edge→Fog間の拡張サイズメッセージの送信は可能。<br>
 お気づきの点があれば、ぜひIssueにてお知らせください。
 
 ## LICENSE
-FileCleaner is licensed under the MIT License, see the [LICENSE](LICENSE) file for details.
+node-red-iotedge is licensed under the MIT License, see the [LICENSE](LICENSE) file for details.
