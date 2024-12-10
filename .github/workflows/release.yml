@@ -21,12 +21,15 @@ jobs:
         VERSION: ${{ github.event.release.tag_name }}
         SDK_VERSION: '6.0.0'
     
+    - name: Authenticate to GitHub Packages
+      run: |
+        echo "//npm.pkg.github.com/" > ~/.npmrc
+        echo "@project-gaudi:registry=https://npm.pkg.github.com" >> ~/.npmrc
+      
     - name: Set Node.js version
       uses: actions/setup-node@v4
       with:
         node-version: '18'
-        registry-url: 'https://npm.pkg.github.com/'
-        scope: '@project-gaudi'
 
     - name: install dependencies
       run: npm install
