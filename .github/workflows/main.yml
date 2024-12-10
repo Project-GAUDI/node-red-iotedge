@@ -23,12 +23,12 @@ jobs:
         VERSION: 0.0.1-test
         SDK_VERSION: '6.0.0'
   
-    - name: Authenticate to GitHub Packages
-      run: |
-        echo "//npm.pkg.github.com/" > ~/.npmrc
-        echo "@project-gaudi:registry=https://npm.pkg.github.com" >> ~/.npmrc
-        echo "//registry.npmjs.org/" >> ~/.npmrc
-        echo "registry=https://registry.npmjs.org/" >> ~/.npmrc
+    # - name: Authenticate to GitHub Packages
+    #   run: |
+    #     echo "//npm.pkg.github.com/" > ~/.npmrc
+    #     echo "@project-gaudi:registry=https://npm.pkg.github.com" >> ~/.npmrc
+    #     echo "//registry.npmjs.org/" >> ~/.npmrc
+    #     echo "registry=https://registry.npmjs.org/" >> ~/.npmrc
     
     - name: Set Node.js version
       uses: actions/setup-node@v4
@@ -36,6 +36,8 @@ jobs:
         node-version: '18'
         registry-url: 'https://npm.pkg.github.com/'
         scope: '@project-gaudi'
+        always-auth: true
+        token: ${{ secrets.GITHUB_TOKEN }}
     
     - name: install dependencies
       run: npm install
