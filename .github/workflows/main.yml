@@ -7,7 +7,7 @@ on:
       - develop
 
 jobs:
-  build:
+  setup-and-install:
     runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v4
@@ -22,13 +22,6 @@ jobs:
       env: 
         VERSION: 0.0.1-test
         SDK_VERSION: '6.0.0'
-  
-    # - name: Authenticate to GitHub Packages
-    #   run: |
-    #     echo "//npm.pkg.github.com/" > ~/.npmrc
-    #     echo "@project-gaudi:registry=https://npm.pkg.github.com" >> ~/.npmrc
-    #     echo "//registry.npmjs.org/" >> ~/.npmrc
-    #     echo "registry=https://registry.npmjs.org/" >> ~/.npmrc
     
     - name: Set Node.js version
       uses: actions/setup-node@v4
@@ -41,10 +34,5 @@ jobs:
     
     - name: install dependencies
       run: npm install
-      env:
-        NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: build
-      run: npm run build
       env:
         NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
