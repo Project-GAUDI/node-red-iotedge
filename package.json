@@ -1,20 +1,20 @@
 {
-    "name": "node-red-iotedge",
-    "version": "",
-    "description": "Based on node-red-contrib-azure-iot-edge-module v1.0.4",
-    "author": "",
-    "license": "ISC",
-    "keywords": [
-        "node-red"
-    ],
-    "node-red": {
-        "nodes": {
-          "Azure IoT": "node-red-contrib-azure-iot-edge-module/azureiotedge.js"
-        }
-    },
-    "dependencies": {
-      "gaudi-iot-device": "",
-      "azure-iot-device-mqtt": "^1.15.1",
-      "gaudi-iot-device-amqp": ""
-    }
+  "name": "node-red-iotedge",
+  "version": "This setting is automatically overwritten with pipeline tag.",
+  "description": "",
+  "author": "",
+  "license": "ISC",
+  "keywords": [
+      "node-red"
+  ],
+  "node-red": {
+      "nodes": {
+        "Azure IoT": "node-red-contrib-azure-iot-edge-module/azureiotedge.js"
+      }
+  },
+  "dependencies": {
+    "azure-iot-device": "^1.17.1",
+    "azure-iot-device-mqtt": "^1.15.1",
+    "azure-iot-device-amqp": "^1.13.1"
+  }
 }
