@@ -27,11 +27,14 @@ jobs:
       run: |
         echo "//npm.pkg.github.com/" > ~/.npmrc
         echo "@project-gaudi:registry=https://npm.pkg.github.com" >> ~/.npmrc
+        echo "//registry.npmjs.org/" >> ~/.npmrc
+        echo "registry=https://registry.npmjs.org/" >> ~/.npmrc
     
     - name: Set Node.js version
       uses: actions/setup-node@v4
       with:
         node-version: '18'
+        registry-url: 'https://npm.pkg.github.com/'
     
     - name: install dependencies
       run: npm install
