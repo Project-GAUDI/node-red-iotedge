@@ -13,8 +13,8 @@ module.exports = function (RED) {
         Transport = TransportMqtt;
     }
 
-    var Client = require('gaudi-iot-device').ModuleClient;
-    var Message = require('gaudi-iot-device').Message;
+    var Client = require('@project-gaudi/gaudi-iot-device').ModuleClient;
+    var Message = require('@project-gaudi/gaudi-iot-device').Message;
 
     // azure-iot-commonはazure-iot-device他の依存関係に含まれているためdepenedenciesには含めていない
     var MyExponentialBackOffWithJitter = require('azure-iot-common').ExponentialBackOffWithJitter;
