@@ -1,7 +1,7 @@
 module.exports = function (RED) {
     'use strict'
 
-    var TransportAmqp = require('gaudi-iot-device-amqp').Amqp;
+    var TransportAmqp = require('@project-gaudi/gaudi-iot-device').Amqp;
     var TransportMqtt = require('azure-iot-device-mqtt').Mqtt;
 
     var TransportProtocol = "Amqp";         // 使用プロトコルの設定(Amqp/Mqtt)
