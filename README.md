@@ -18,8 +18,8 @@
   * [Module Output](#Node-Specification-module-output)
   * [Module Twin](#Node-Specification-module-twin)
   * [Module Method](#Node-Specification-module-method)
-  * [Feedback](#feedback)
-  * [LICENSE](#license)
+* [Feedback](#feedback)
+* [LICENSE](#license)
   
 ## 概要
 Azure IoT Edge Node-RED Moduleをベースに一部カスタムを行ったNodeRedのカスタムノードです。
@@ -400,4 +400,4 @@ Edge→Fog間の拡張サイズメッセージの送信は可能。<br>
 お気づきの点があれば、ぜひIssueにてお知らせください。
 
 ## LICENSE
-FileCleaner is licensed under the MIT License, see the [LICENSE](LICENSE) file for details.
+node-red-iotedge is licensed under the MIT License, see the [LICENSE](LICENSE) file for details.
