@@ -160,16 +160,16 @@ Edge→Fog間の拡張サイズメッセージの送信は可能。<br>
 
   [入力メッセージ]
 
-  ```
+  ````
   DeviceId = Edge01,
   ModuleId = gaudinodered01,
   Body = { "RecordList": [{ "RecordHeader": ["aaa"], "RecordData": ["bbb"] }] },
   Property = "xxx":"val1","yyy":"val2","zzz":"val3"
-  ```
+  ````
 
   [出力メッセージ]
 
-  ```json
+  ```
   {
     "payload": {
       "RecordList": [{ "RecordHeader": ["aaa"], "RecordData": ["bbb"] }]
@@ -233,7 +233,7 @@ Edge→Fog間の拡張サイズメッセージの送信は可能。<br>
 
   [入力メッセージ]
 
-  ```json
+  ```
   {
     "payload": { "RecordList": [{ "RecordHeader": ["aaa"], "RecordData": ["bbb"] }] },
     "properties": {
