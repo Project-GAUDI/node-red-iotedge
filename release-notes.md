@@ -1,5 +1,10 @@
 # Node-RED-IoTEdge Release Notes
 
+## 6.0.2
+
+* 環境変数AzureIoTMaxOperationTimeoutを小さい値にするとノード初期化に失敗する不具合修正
+  * AzureIoTMaxOperationTimeoutの下限を設定(240000ミリ秒)
+
 ## 6.0.1
 
 * GAUDIコンテナのログ出力のポリシー変更対応
