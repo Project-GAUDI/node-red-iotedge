@@ -1,7 +1,7 @@
 module.exports = function (RED) {
     'use strict'
 
-    var TransportAmqp = require('@project-gaudi/gaudi-iot-device-amqp').Amqp;
+    var TransportAmqp = require('gaudi-iot-device-amqp').Amqp;
     var TransportMqtt = require('azure-iot-device-mqtt').Mqtt;
 
     var TransportProtocol = "Amqp";         // 使用プロトコルの設定(Amqp/Mqtt)
@@ -13,8 +13,8 @@ module.exports = function (RED) {
         Transport = TransportMqtt;
     }
 
-    var Client = require('@project-gaudi/gaudi-iot-device').ModuleClient;
-    var Message = require('@project-gaudi/gaudi-iot-device').Message;
+    var Client = require('gaudi-iot-device').ModuleClient;
+    var Message = require('gaudi-iot-device').Message;
 
     // azure-iot-commonはazure-iot-device他の依存関係に含まれているためdepenedenciesには含めていない
     var MyExponentialBackOffWithJitter = require('azure-iot-common').ExponentialBackOffWithJitter;
@@ -354,12 +354,19 @@ module.exports = function (RED) {
 
     function getMaxOperationTimeout(node) {
         node.trace("getMaxOperationTimeout start.");
-        var strtimeout = process.env.AzureIoTMaxOperationTimeout || "3600000";
-        var timeout = parseInt(strtimeout);
+        var minTimeout = 240000; // sdkのクライアント操作最大タイムアウト時間デフォルト値。これを設定可能な下限とする。
+        var defaultMaxOperationTimeout = 3600000;
+        var strTimeout = process.env.AzureIoTMaxOperationTimeout || `${defaultMaxOperationTimeout}`;
+        var timeout = parseInt(strTimeout);
         if (true == isNaN(timeout)) {
-            throw new Error("AzureIoTMaxOperationTimeout is not Number.:" + strtimeout);
+            node.warn(`AzureIoTMaxOperationTimeout is not Number: ${strTimeout}. Default value (${defaultMaxOperationTimeout}) assigned.`);
+            timeout = defaultMaxOperationTimeout;
         }
-        node.debug("timeout = " + strtimeout);
+        else if (timeout < minTimeout) {
+            node.warn(`AzureIoTMaxOperationTimeout cannot be set to less than ${minTimeout}: ${timeout}. Lower limit value (${minTimeout}) assigned.`);
+            timeout = minTimeout;
+        }
+        node.debug(`timeout = ${timeout}`);
         return timeout;
     }
 
