@@ -1,9 +1,9 @@
 {
   "name": "node-red-iotedge",
-  "version": "6.0.2",
-  "description": "Based on node-red-contrib-azure-iot-edge-module v1.0.4",
-  "author": "Toyota Industries Corporation",
-  "license": "MIT",
+  "version": "This setting is automatically overwritten with pipeline tag.",
+  "description": "",
+  "author": "",
+  "license": "ISC",
   "keywords": [
       "node-red"
   ],
@@ -13,8 +13,8 @@
       }
   },
   "dependencies": {
-    "gaudi-iot-device": "6.0.0",
-    "gaudi-iot-device-mqtt": "6.0.0",
-    "gaudi-iot-device-amqp": "6.0.0"
+    "azure-iot-device": "^1.17.1",
+    "azure-iot-device-mqtt": "^1.15.1",
+    "azure-iot-device-amqp": "^1.13.1"
   }
 }
