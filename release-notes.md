@@ -1,5 +1,30 @@
 # Node-RED-IoTEdge Release Notes
 
+## 7.0.0
+
+* 機能改善
+  * ライブラリを最新化
+    * gaudi-iot-device(7.0.0)
+    * azure-iot-device-mqtt(1.16.4)
+    * azure-iot-device-amqp(1.14.4)
+* Node-RED-Templateの反映(ver7.0.0)
+
+## 6.1.0
+
+* 接続がタイムアウトすると受信系のノードが再接続不可となるため、環境変数AzureIoTMaxOperationTimeoutのデフォルト値変更(1h→24h)
+* 仕様書修正
+  * 環境変数AzureIoTMaxOperationTimeoutに注意書きを追加
+  * ModuleMethodに注意書きを追加
+* sdkライブラリバージョンの変更
+  * gaudi-iot-device : 6.0.1 → 6.0.2
+  * gaudi-iot-device-amqp : 6.0.1 → 6.0.2
+* 課題対応
+  * ノードステータスの遷移が不足している箇所を修正
+  * フロー実行時の例外出力をcatchノードで拾えるように修正(グローバル設定ノードは対象外)
+  * 同一ダイレクトメソッドを同時に複数回実行した際にも正しいレスポンスが返せるよう修正
+  * 環境変数AzureIoTMaxOperationTimeoutに不正値を設定した際にエラーになるよう修正
+* Node-RED-Templateの反映(ver6.1.0)
+
 ## 6.0.2
 
 * 環境変数AzureIoTMaxOperationTimeoutを小さい値にするとノード初期化に失敗する不具合修正
