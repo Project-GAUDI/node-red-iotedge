@@ -28,7 +28,7 @@ jobs:
       run: ./tools/edit_packageJSON.sh
       env: 
         VERSION: 0.0.1-test
-        SDK_VERSION: '6.0.0'
+        SDK_VERSION: '7.0.0'
     
     - name: Set Node.js version
       uses: actions/setup-node@v7
