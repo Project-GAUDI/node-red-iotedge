@@ -1,15 +1,33 @@
 #!/bin/bash
-set -euo pipefail
 
-name="@project-gaudi/node-red-iotedge"
-version="${VERSION:?VERSION is required}"
-sdkVersion="${SDK_VERSION:?SDK_VERSION is required}"
-description="Based on node-red-contrib-azure-iot-edge-module v1.0.4"
+name="@project-gaudi\/node-red-iotedge"
+description="Node-RED-IoTEdge"
 target="package.json"
+author="Toyota Industries Corporation"
+lisence="MIT"
+# version=${VERSION}
+version='7.0.0'
+url="https://github.com/Project-GAUDI/node-red-iotedge"
 
-sed -i 's|"name": ".*"|"name": "'"${name}"'"|g' "${target}"
-sed -i 's|"version": ".*"|"version": "'"${version}"'"|g' "${target}"
-sed -i 's|"description": ".*"|"description": "'"${description}"'"|g' "${target}"
-sed -i 's|"azure-iot-device": ".*"|"gaudi-iot-device": "npm:@project-gaudi/gaudi-iot-device@'"${sdkVersion}"'"|g' "${target}"
-sed -i 's/\"azure-iot-device-amqp\": \".*\"/\"azure-iot-device-amqp\": \"'"1.14.4"'\"/g' "${target}"
-sed -i 's/\"azure-iot-device-mqtt\": \".*\"/\"azure-iot-device-mqtt\": \"'"^1.16.4"'\"/g' "${target}"
+sed -i 's/\"name\": \".*\",/\"name\": \"'"${name}"'\",/g' "${target}"
+sed -i 's/\"version\": \".*\",/\"version\": \"'"${version}"'\",/g' "${target}"
+sed -i 's/\"description\": \".*\",/\"description\": \"'"${description}"'\",/g' "${target}"
+sed -i 's|"author": ".*",|"author": "'"${author}"'", |g' "${target}"
+sed -i 's|"license": ".*"|"license": "'"${lisence}"'"|g' "${target}"
+
+grep -q '"repository"' "${target}" || \
+sed -i '/"node-red": {/i \
+  "repository": { \
+    "type": "git",\
+    "url": "git+https://github.com/Project-GAUDI/node-red-iotedge" \
+  },' "${target}"
+
+grep -q '"bugs"' "${target}" || \
+sed -i '/"node-red": {/i \
+  "bugs": { \
+    "url": "https://github.com/Project-GAUDI/node-red-iotedge/issues" \
+  },' "${target}"
+
+grep -q '"homepage"' "${target}" || \
+sed -i '/"node-red": {/i \
+  "homepage": "https://github.com/Project-GAUDI/node-red-iotedge#readme",' "${target}"
