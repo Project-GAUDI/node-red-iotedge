@@ -6,10 +6,10 @@ on:
 
 jobs:
   publish:
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       packages: write
-    runs-on: ubuntu-24.04
     steps:
     - uses: actions/checkout@v7
       with:
@@ -19,7 +19,7 @@ jobs:
       run: chmod +x ./tools/edit_packageJSON.sh
   
     - name: Edit package.json for gaudi-iot-device
-      run: ./tools/edit_packageJSON.sh
+      run: ./tools/edit_packageJSON.sh "$VERSION"
       env: 
         VERSION: ${{ github.event.release.tag_name }}
         SDK_VERSION: '7.0.0'
@@ -32,7 +32,9 @@ jobs:
         scope: '@project-gaudi'
 
     - name: install dependencies
-      run: npm install
+      run: |
+        npm pkg set name="@project-gaudi/node-red-iotedge"
+        npm install
       env:
         NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
