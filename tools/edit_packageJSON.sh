@@ -1,12 +1,16 @@
 #!/bin/bash
 
 name="@project-gaudi\/node-red-iotedge"
-description="Based on node-red-contrib-azure-iot-edge-module v1.0.4"
+description="Node-RED-IoTEdge"
 target="package.json"
 author="Toyota Industries Corporation"
 lisence="MIT"
-version=${VERSION}
-sdkVersion=${SDK_VERSION}
+# version=${VERSION}
+version='7.0.0'
+# sdkVersion=${SDK_VERSION}
+sdkVersion='7.0.0'
+
+url="https://github.com/Project-GAUDI/node-red-iotedge"
 
 sed -i 's/\"name\": \".*\",/\"name\": \"'"${name}"'\",/g' "${target}"
 sed -i 's/\"version\": \".*\",/\"version\": \"'"${version}"'\",/g' "${target}"
