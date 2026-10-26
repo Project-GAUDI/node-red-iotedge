@@ -7,11 +7,16 @@ author="Toyota Industries Corporation"
 lisence="MIT"
 # version=${VERSION}
 version='7.0.0'
+# sdkVersion=${SDK_VERSION}
+sdkVersion='7.0.0'
+
 url="https://github.com/Project-GAUDI/node-red-iotedge"
 
 sed -i 's/\"name\": \".*\",/\"name\": \"'"${name}"'\",/g' "${target}"
 sed -i 's/\"version\": \".*\",/\"version\": \"'"${version}"'\",/g' "${target}"
 sed -i 's/\"description\": \".*\",/\"description\": \"'"${description}"'\",/g' "${target}"
+sed -i 's/\"azure-iot-device\": \".*\"/\"@project-gaudi\/gaudi-iot-device\": \"'"${sdkVersion}"'\"/g' "${target}"
+sed -i 's/\"azure-iot-device-amqp\": \".*\"/\"@project-gaudi\/gaudi-iot-device-amqp\": \"'"${sdkVersion}"'\"/g' "${target}"
 sed -i 's|"author": ".*",|"author": "'"${author}"'", |g' "${target}"
 sed -i 's|"license": ".*"|"license": "'"${lisence}"'"|g' "${target}"
 
