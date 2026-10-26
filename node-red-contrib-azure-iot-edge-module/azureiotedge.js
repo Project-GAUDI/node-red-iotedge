@@ -1,8 +1,9 @@
 module.exports = function (RED) {
     'use strict'
 
-    var TransportAmqp = require('gaudi-iot-device-amqp').Amqp;
+    var TransportAmqp = require('azure-iot-device-amqp').Amqp;
     var TransportMqtt = require('azure-iot-device-mqtt').Mqtt;
+    const util = require('util');
 
     var TransportProtocol = "Amqp";         // 使用プロトコルの設定(Amqp/Mqtt)
     var Transport = null;
@@ -38,6 +39,12 @@ module.exports = function (RED) {
     var moduleTwin;
     var methodResponses = [];
 
+    const utilOpt = {
+        depth: 10,              // オブジェクトの展開する深さ。現在の設定ではネスト10個目まで展開し、以降は型名のみ表示。
+        breakLength: Infinity,  // 改行する文字数。現在の設定ではスタックトレース以外改行なし。
+        compact: true,          // 表示をコンパクトにするかどうか。現在の設定ではプロパティごとの改行をしない。
+    };
+
     // Function to create the IoT Edge Client 
     function IoTEdgeClient(config) {
         // Store node for further use
@@ -60,7 +67,7 @@ module.exports = function (RED) {
                     node.error('Module Client preDisconnect:' + msg);
                 });
                 client.on('disconnect', function (err) {
-                    node.error('Module Client disconnected:' + JSON.stringify(err));
+                    node.error('Module Client disconnected:' + util.inspect(err,utilOpt));
                 });
                 node.log('Module Client created.');
                 var result = setTimeoutOptions(client, node);
@@ -102,14 +109,12 @@ module.exports = function (RED) {
                 client.open(function (err) {
                     if (err) {
                         node.error('Module Client open error:' + err);
-                        throw err;
                     } else {
                         node.log('Module Client connected.');
                         edgeClient = client;
                         client.getTwin(function (err, twin) {
                             if (err) {
                                 node.error('Could not get the module twin: ' + err);
-                                throw err;
                             } else {
                                 node.log('Module twin created.');
                                 node.trace('Twin contents:');
@@ -147,37 +152,53 @@ module.exports = function (RED) {
             setStatus(node, statusEnum.connected);
             // Register for changes
             twin.on('properties.desired', function (delta) {
-                setStatus(node, statusEnum.desired);
-                node.log('New desired properties received.');
-                node.trace('New desired properties: ' + JSON.stringify(delta));
-                node.send({ payload: delta, topic: "desired" })
-                setStatus(node, statusEnum.connected);
+                try {
+                    setStatus(node, statusEnum.desired);
+                    node.log('New desired properties received.');
+                    node.trace('New desired properties: ' + JSON.stringify(delta));
+                    node.send({ payload: delta, topic: "desired" })
+                    setStatus(node, statusEnum.connected);
+                } catch (err) {
+                    node.error('Module Twin properties.desired handler error: ' + err.toString(), {});
+                    node.log('moduletwin.ModuleTwin Error : Module Twin properties.desired handler error: ' + err.toString());
+                    setStatus(node, statusEnum.error);
+                }
             });
 
             node.on('input', function (msg) {
-                setStatus(node, statusEnum.reported);
-                var messageJSON = null;
+                try{
+                    setStatus(node, statusEnum.reported);
+                    var messageJSON = null;
 
-                if (typeof (msg.payload) != "string") {
-                    messageJSON = msg.payload;
-                } else {
-                    //Converting string to JSON Object
-                    messageJSON = JSON.parse(msg.payload);
+                    if (typeof (msg.payload) != "string") {
+                        messageJSON = msg.payload;
+                    } else {
+                        //Converting string to JSON Object
+                        messageJSON = JSON.parse(msg.payload);
+                    }
+
+                    twin.properties.reported.update(messageJSON, function (err) {
+                        if (err) {
+                            node.error('Twin state report error: ' + err.toString(), {});
+                            setStatus(node, statusEnum.error);
+                        } else {
+                            node.log('Twin state reported.');
+                            setStatus(node, statusEnum.connected);
+                        }
+                    });
+                } catch (err) {
+                    node.error('Module Twin input handler error:' + err.toString(), {});
+                    node.log('moduletwin.ModuleTwin Error : Module Twin input handler error: ' + err.toString());
+                    setStatus(node, statusEnum.error);
                 }
-
-                twin.properties.reported.update(messageJSON, function (err) {
-                    if (err) throw err;
-                    node.log('Twin state reported.');
-                    setStatus(node, statusEnum.connected);
-                });
             });
         })
             .catch(function (err) {
                 node.error('Module Twin error:' + err);
+                setStatus(node, statusEnum.disconnected);
             });
 
         node.on('close', function (done) {
-            setStatus(node, statusEnum.disconnected);
             done();
         });
     }
@@ -232,10 +253,10 @@ module.exports = function (RED) {
         })
             .catch(function (err) {
                 node.error("Module Input can't be loaded: " + err);
+                setStatus(node, statusEnum.disconnected);
             });
 
         node.on('close', function (done) {
-            setStatus(node, statusEnum.disconnected);
             node.alive = false;         // ノードの生存フラグをoff
             node.client.removeInputName(node.input, node.id);
             done();
@@ -262,10 +283,10 @@ module.exports = function (RED) {
         })
             .catch(function (err) {
                 node.error("Module Output can't be loaded: " + err);
+                setStatus(node, statusEnum.disconnected);
             });
 
         node.on('close', function (done) {
-            setStatus(node, statusEnum.disconnected);
             done();
         });
     }
@@ -288,15 +309,17 @@ module.exports = function (RED) {
                 setStatus(node, statusEnum.method);
                 node.log('Direct Method called: ' + request.methodName);
 
+                var requestId = generateRequestId();
+
                 if (request.payload) {
                     node.trace('Method Payload:' + JSON.stringify(request.payload));
-                    node.send({ payload: request.payload, topic: "method", method: request.methodName });
+                    node.send({ payload: request.payload, topic: "method", method: request.methodName, requestId: requestId });
                 }
                 else {
-                    node.send({ payload: null, topic: "method", method: request.methodName });
+                    node.send({ payload: null, topic: "method", method: request.methodName, requestId: requestId });
                 }
 
-                getResponse(node).then(function (rspns) {
+                getResponse(node, requestId).then(function (rspns) {
                     var responseBody;
                     if (typeof (rspns.response) != "string") {
                         // Turn message object into string 
@@ -306,14 +329,18 @@ module.exports = function (RED) {
                     }
                     response.send(rspns.status, responseBody, function (err) {
                         if (err) {
-                            node.error('Failed sending method response: ' + err);
+                            node.error('Failed sending method response: ' + util.inspect(err,utilOpt), {});
+                            node.log('modulemethod.ModuleMethod Error : Failed sending method response: ' + util.inspect(err,utilOpt));
+                            setStatus(node, statusEnum.error);
                         } else {
                             node.log('Successfully sent method response.');
                         }
                     });
                 })
                     .catch(function (err) {
-                        node.error("Failed sending method response: response not received.");
+                        node.error("Failed sending method response: response not received for requestId: " + requestId + " - " + err.toString(), {});
+                        node.log("modulemethod.ModuleMethod Error : Failed sending method response: response not received for requestId: " + requestId + " - " + err.toString());
+                        setStatus(node, statusEnum.error);
                     });
                 // reset response
                 node.response = null;
@@ -325,17 +352,17 @@ module.exports = function (RED) {
             node.on('input', function (msg) {
                 var method = node.method;
                 methodResponses.push(
-                    { method: method, response: msg.payload, status: msg.status }
+                    { method: method, response: msg.payload, status: msg.status , requestId: msg.requestId }
                 );
                 node.trace("Module Method response set through node input: " + JSON.stringify(methodResponses.find(function (m) { return m.method === method })));
             });
         })
             .catch(function (err) {
                 node.error("Module Method can't be loaded: " + err);
+                setStatus(node, statusEnum.disconnected);
             });
 
         node.on('close', function (done) {
-            setStatus(node, statusEnum.disconnected);
             done();
         });
     }
@@ -355,19 +382,42 @@ module.exports = function (RED) {
     function getMaxOperationTimeout(node) {
         node.trace("getMaxOperationTimeout start.");
         var minTimeout = 240000; // sdkのクライアント操作最大タイムアウト時間デフォルト値。これを設定可能な下限とする。
-        var defaultMaxOperationTimeout = 3600000;
-        var strTimeout = process.env.AzureIoTMaxOperationTimeout || `${defaultMaxOperationTimeout}`;
+        var defaultMaxOperationTimeout = 86400000; //設定値のデフォルト(24h)
+        var strTimeout = process.env.AzureIoTMaxOperationTimeout;
+    
+        // 環境変数が未設定の場合はデフォルト値を返す
+        if (!strTimeout) {
+            node.debug(`timeout = ${defaultMaxOperationTimeout} (default)`);
+            return defaultMaxOperationTimeout;
+        }
         var timeout = parseInt(strTimeout);
         if (true == isNaN(timeout)) {
-            node.warn(`AzureIoTMaxOperationTimeout is not Number: ${strTimeout}. Default value (${defaultMaxOperationTimeout}) assigned.`);
-            timeout = defaultMaxOperationTimeout;
+            var errorMsg = `AzureIoTMaxOperationTimeout is not Number: ${strTimeout}. Process terminated.`;
+            throw new Error(errorMsg);
         }
         else if (timeout < minTimeout) {
-            node.warn(`AzureIoTMaxOperationTimeout cannot be set to less than ${minTimeout}: ${timeout}. Lower limit value (${minTimeout}) assigned.`);
-            timeout = minTimeout;
+            var errorMsg = `AzureIoTMaxOperationTimeout cannot be set to less than ${minTimeout}: ${timeout}. Process terminated.`;
+            throw new Error(errorMsg);
         }
         node.debug(`timeout = ${timeout}`);
         return timeout;
+    }
+
+    function generateRequestId() {
+        // 日時文字列(ローカル時間)_ランダム文字列
+        var now = new Date();
+        var year = now.getFullYear();
+        var month = String(now.getMonth() + 1).padStart(2, '0');
+        var day = String(now.getDate()).padStart(2, '0');
+        var hour = String(now.getHours()).padStart(2, '0');
+        var minute = String(now.getMinutes()).padStart(2, '0');
+        var second = String(now.getSeconds()).padStart(2, '0');
+        var ms = String(now.getMilliseconds()).padStart(3, '0');
+        
+        var dateTime = year + month + day + hour + minute + second + ms;
+        var random = Math.random().toString(36).slice(2, 11);
+        
+        return dateTime + '_' + random;
     }
 
     function getErrorFilter(node) {
@@ -443,7 +493,11 @@ module.exports = function (RED) {
     function getClient(node) {
         node.trace("getClient start.");
         var timeOut = 1000;
-        var maxOperationTimeOut = getMaxOperationTimeout(node);
+        try {
+            var maxOperationTimeOut = getMaxOperationTimeout(node);
+        } catch (err) {
+            return Promise.reject(err);
+        }
 
         // Retrieve client using progressive promise to wait for module client to be opened
         var promise = Promise.reject();
@@ -460,7 +514,7 @@ module.exports = function (RED) {
                     return edgeClient;
                 }
                 else {
-                    throw new Error("Module Client not initiated..");
+                    throw new Error("Module Client not initiated.");
                 }
             })
             .catch(function rejectDelay(reason) {
@@ -484,7 +538,11 @@ module.exports = function (RED) {
     function getTwin(node) {
         node.trace("getTwin start.");
         var timeOut = 1000;
-        var maxOperationTimeOut = getMaxOperationTimeout(node);
+        try {
+            var maxOperationTimeOut = getMaxOperationTimeout(node);
+        } catch (err) {
+            return Promise.reject(err);
+        }
 
         // Retrieve twin using progressive promise to wait for module twin to be opened
         var promise = Promise.reject();
@@ -501,7 +559,7 @@ module.exports = function (RED) {
                     return moduleTwin;
                 }
                 else {
-                    throw new Error("Module Twin not initiated..");
+                    throw new Error("Module Twin not initiated.");
                 }
             })
             .catch(function rejectDelay(reason) {
@@ -522,7 +580,7 @@ module.exports = function (RED) {
     }
 
     // Get module method response using promise, and retry, and slow backoff
-    function getResponse(node) {
+    function getResponse(node, requestId) {
         var retries = 20;
         var timeOut = 1000;
         var m = {};
@@ -531,16 +589,16 @@ module.exports = function (RED) {
         var promise = Promise.reject();
         for (var i = 1; i <= retries; i++) {
             promise = promise.catch(function () {
-                var methodResponse = methodResponses.find(function (m) { return m.method === node.method });
+                var methodResponse = methodResponses.find(function (m) { return m.method === node.method && m.requestId === requestId });
                 if (methodResponse) {
                     // get the response and clean the array
                     var response = methodResponse;
                     node.trace("Module Method response object found: " + JSON.stringify(response));
-                    methodResponses.splice(methodResponses.findIndex(function (m) { return m.method === node.method }), 1);
+                    methodResponses.splice(methodResponses.findIndex(function (m) { return m.method === node.method && m.requestId === requestId }), 1);
                     return response;
                 }
                 else {
-                    throw new Error("Module Method Response not initiated..");
+                    throw new Error("Module Method Response not initiated.");
                 }
             })
                 .catch(function rejectDelay(reason) {
@@ -570,7 +628,7 @@ module.exports = function (RED) {
             // input名一致時のみ実施するように変更
             // client.complete(msg, function (err) {
             //     if (err) {
-            //         node.error('Failed sending message to node output:' + err);
+            //         node.error('Failed sending message to node output:' + err, msg);
             //         setStatus(node, statusEnum.error);
             //     }
             // });
@@ -580,10 +638,12 @@ module.exports = function (RED) {
                 client.complete(msg, function (err) {
                     if (err) {
                         if (err instanceof myErrors.DeviceMessageLockLostError) {
-                            node.error('Failed sending message to node output. Nodes with the same input name may exist.:' + err);
+                            node.error('Failed sending message to node output. Nodes with the same input name may exist: ' + err.toString(), {});
+                            node.log('moduleinput.outputMessage Error : Failed sending message to node output. Nodes with the same input name may exist: ' + err.toString());
                             setStatus(node, statusEnum.error);
                         } else {
-                            node.error('Failed sending message to node output:' + err);
+                            node.error('Failed sending message to node output: ' + err.toString(), {});
+                            node.log('moduleinput.outputMessage Error : Failed sending message to node output: ' + err.toString());
                             setStatus(node, statusEnum.error);
                         }
                     }
@@ -635,7 +695,8 @@ module.exports = function (RED) {
                 setStatus(node, statusEnum.connected);
             }
         } catch (err) {
-            node.error(err, message);
+            node.error('outputMessage error: ' + err.toString(), { payload: messageString });
+            node.log('moduleinput.outputMessage Error : outputMessage error: ' + err.toString());
             setStatus(node, statusEnum.error);
         }
     }
@@ -732,7 +793,8 @@ module.exports = function (RED) {
 
             client.sendOutputEvent(output, msg, function (err, res) {
                 if (err) {
-                    node.error('Error while trying to send message:' + err.toString());
+                    node.error('Error while trying to send message:' + err.toString(), {});
+                    node.log('moduleoutput.sendMessageToEdgeHub Error : Error while trying to send message:' + err.toString());
                     setStatus(node, statusEnum.error);
                 } else {
                     node.log('Message sent.');
@@ -740,7 +802,8 @@ module.exports = function (RED) {
                 }
             });
         } catch (err) {
-            node.error(err, message);
+            node.error('sendMessageToEdgeHub error: ' + err.toString(), {});
+            node.log('moduleoutput.sendMessageToEdgeHub Error : sendMessageToEdgeHub error: ' + err.toString());
             setStatus(node, statusEnum.error);
         }
     }
